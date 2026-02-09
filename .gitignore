@@ -1,0 +1,9 @@
+# Database
+db/*.db
+
+# Reports
+reports/*.csv
+
+# Python cache
+__pycache__/
+*.pyc
