@@ -15,6 +15,35 @@ This project simulates how real-world portfolio managers make investment decisio
 - Data visualization (EDA)  
 
 ---
+## 🧩 Sprint Plan
+
+### Sprint 1 (Weeks 1-2)
+- Setup project structure  
+- Learn Streamlit and database  
+- Implement data fetching  
+
+---
+
+### Sprint 2 (Weeks 3-4)
+- Implement risk analysis  
+- Add prediction model (Linear Regression)  
+- Store data in SQLite  
+
+---
+
+### Sprint 3 (Weeks 5-6)
+- Build UI dashboard  
+- Add graphs and visualization  
+- Implement portfolio allocation  
+
+---
+
+### Sprint 4 (Weeks 7-8)
+- Improve UI design  
+- Fix bugs  
+- Prepare documentation  
+
+---
 
 ## ⚙️ Features
 
