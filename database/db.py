@@ -2,6 +2,9 @@ import sqlite3
 
 DB_FILE = "data/prices.db"
 
+# ------------------------
+# PRICE TABLE
+# ------------------------
 def create_table():
     conn = sqlite3.connect(DB_FILE)
 
@@ -28,3 +31,4 @@ def fetch_data():
     data = conn.execute("SELECT * FROM prices").fetchall()
     conn.close()
     return data
+

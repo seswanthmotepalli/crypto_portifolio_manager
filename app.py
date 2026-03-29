@@ -1,46 +1,51 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from database.db import create_table, insert_data, fetch_data
 from modules.fetch_data import get_historical_data
 from modules.risk_analysis import analyze_risk
-from modules.predictor import predict_trend
+from modules.predictor import predict_future_price
 from modules.portfolio import allocate
-from modules.rules import apply_rules
 from modules.report import generate_report
-from modules.graphs import plot_prices
+from modules.graphs import (
+    plot_prices,
+    plot_allocation,
+    plot_price_distribution,
+    plot_volatility
+)
 from modules.alert import check_alerts
 
 # =========================
-# PAGE CONFIG (Professional UI)
+# PAGE CONFIG
 # =========================
-st.set_page_config(
-    page_title="Crypto Investment Manager",
-    layout="wide"
-)
+st.set_page_config(page_title="Crypto Investment Manager", layout="wide")
 
 # =========================
-# CUSTOM CSS (Dark Theme + Styling)
+# CLEAN UI
 # =========================
 st.markdown("""
 <style>
-body {
-    background-color: #0e1117;
-}
 .stApp {
     background-color: #0e1117;
     color: white;
 }
-.card {
-    padding: 15px;
-    border-radius: 10px;
-    background-color: #1c1f26;
-    margin-bottom: 10px;
+.stButton>button {
+    background-color: #1f6feb;
+    color: white;
+    border-radius: 8px;
+    padding: 10px;
+    font-weight: bold;
 }
-.green {color: #00ff9c;}
-.red {color: #ff4b4b;}
-.yellow {color: #ffd700;}
+.stButton>button:hover {
+    background-color: #388bfd;
+}
+.card {
+    background-color: #161b22;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    margin: 10px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -53,22 +58,15 @@ create_table()
 # HEADER
 # =========================
 st.title("🚀 Crypto Investment Manager")
-st.markdown("Smart portfolio analysis with risk-based allocation")
+st.caption("Smart portfolio with risk analysis & ML prediction")
 
 # =========================
-# BUTTON ROW
+# FETCH DATA
 # =========================
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button("📥 Fetch 30 Days Data"):
-        df = get_historical_data(30)
-        insert_data(df)
-        st.success("Data updated!")
-
-with col2:
-    if st.button("🧹 Clear Database"):
-        st.warning("Delete data/prices.db manually for clean reset")
+if st.button("📥 Fetch 30 Days Data"):
+    df = get_historical_data(30)
+    insert_data(df)
+    st.success("Data updated!")
 
 # =========================
 # LOAD DATA
@@ -81,86 +79,106 @@ if data:
     df = df.sort_values(by="date")
 
     # =========================
-    # TOP SECTION (2 columns)
+    # GRAPH + RISK
     # =========================
     left, right = st.columns([2, 1])
 
-    # =========================
-    # 📊 GRAPH
-    # =========================
     with left:
         st.subheader("📈 Market Trends")
-        fig = plot_prices(df)
-        st.pyplot(fig)
+        st.pyplot(plot_prices(df))
 
-    # =========================
-    # ⚠ RISK PANEL
-    # =========================
     with right:
         st.subheader("⚠ Risk Overview")
-
         risk = analyze_risk(df)
 
         for coin in risk:
             level = risk[coin]["level"]
-            value = round(risk[coin]["value"], 5)
 
             if level == "HIGH":
-                st.markdown(f"<div class='card red'><b>{coin.upper()}</b><br>HIGH RISK<br>{value}</div>", unsafe_allow_html=True)
+                st.error(f"{coin.upper()} → HIGH")
             elif level == "MEDIUM":
-                st.markdown(f"<div class='card yellow'><b>{coin.upper()}</b><br>MEDIUM RISK<br>{value}</div>", unsafe_allow_html=True)
+                st.warning(f"{coin.upper()} → MEDIUM")
             else:
-                st.markdown(f"<div class='card green'><b>{coin.upper()}</b><br>LOW RISK<br>{value}</div>", unsafe_allow_html=True)
+                st.success(f"{coin.upper()} → LOW")
 
     # =========================
-    # TREND + PORTFOLIO
+    # 🔮 PREDICTION (CARD UI)
     # =========================
-    trend = {}
+    st.subheader("🔮 Future Price Prediction")
+
+    future_prices = {}
     for coin in df["coin"].unique():
         prices = df[df["coin"] == coin]["price"].values
-        trend[coin] = predict_trend(prices)
+        future_prices[coin] = predict_future_price(prices)
 
-    allocation = allocate(risk, trend)
-    allocation = apply_rules(allocation)
+    cols = st.columns(len(future_prices))
 
+    for i, coin in enumerate(future_prices):
+        cols[i].markdown(
+            f"<div class='card'><b>{coin.upper()}</b><br>${future_prices[coin]}</div>",
+            unsafe_allow_html=True
+        )
+
+    # =========================
+    # 💰 PORTFOLIO
+    # =========================
     st.subheader("💰 Portfolio Allocation")
 
-    colA, colB, colC = st.columns(3)
+    allocation = allocate(risk, future_prices)
 
-    i = 0
-    for coin in allocation:
-        value = allocation[coin]
+    cols = st.columns(len(allocation))
 
-        if i % 3 == 0:
-            col = colA
-        elif i % 3 == 1:
-            col = colB
-        else:
-            col = colC
-
-        col.markdown(f"<div class='card'><b>{coin.upper()}</b><br>{value}%</div>", unsafe_allow_html=True)
-        i += 1
+    for i, coin in enumerate(allocation):
+        cols[i].markdown(
+            f"<div class='card'><b>{coin.upper()}</b><br>{allocation[coin]}%</div>",
+            unsafe_allow_html=True
+        )
 
     # =========================
-    # REPORT TABLE
+    # 📊 REPORT
     # =========================
-    report = generate_report(risk, trend, allocation)
+    st.subheader("📊 Detailed Report")
+    report = generate_report(risk, future_prices, allocation)
+    st.dataframe(report, width="stretch")
 
-    st.subheader("📄 Detailed Report")
-    st.dataframe(report, use_container_width=True)
+    # =========================
+    # 📊 EDA (FIXED)
+    # =========================
+    st.subheader("📊 Analysis")
+
+    # Row 1
+    colA, colB = st.columns(2)
+
+    with colA:
+        fig1 = plot_allocation(allocation)
+        st.pyplot(fig1)
+
+    with colB:
+        fig2 = plot_volatility(risk)
+        st.pyplot(fig2)
+
+    # Row 2
+    colC, colD = st.columns(2)
+
+    with colC:
+        fig3 = plot_price_distribution(df)
+        st.pyplot(fig3)
+
+    with colD:
+        st.empty()
 
     # =========================
     # ALERTS
     # =========================
-    alerts = check_alerts(df)
-
     st.subheader("🚨 Alerts")
+
+    alerts = check_alerts(df)
 
     if alerts:
         for alert in alerts:
             st.error(alert)
     else:
-        st.success("No major market alerts")
+        st.success("No major alerts")
 
 else:
-    st.warning("⚠ No data found. Fetch data first.")
+    st.warning("No data found. Click 'Fetch Data' first.")
