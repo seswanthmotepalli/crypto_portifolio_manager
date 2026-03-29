@@ -8,23 +8,23 @@ A Python-based crypto portfolio management system that analyzes market data, eva
 
 This project simulates how real-world portfolio managers make investment decisions using:
 
-- Historical market data
-- Risk analysis (volatility)
-- Machine learning prediction (Linear Regression)
-- Portfolio allocation strategies
-- Data visualization (EDA)
+- Historical market data  
+- Risk analysis (volatility)  
+- Machine learning prediction (Linear Regression)  
+- Portfolio allocation strategies  
+- Data visualization (EDA)  
 
 ---
 
 ## ⚙️ Features
 
-✅ Fetch real-time cryptocurrency data (CoinGecko API)  
-✅ Store and manage data using SQLite  
-✅ Risk classification (Low / Medium / High)  
-✅ Future price prediction using Linear Regression  
-✅ Smart portfolio allocation based on risk + prediction  
-✅ Interactive dashboard using Streamlit  
-✅ Data visualization (trends, distribution, allocation)  
+- ✅ Fetch real-time cryptocurrency data (CoinGecko API)  
+- ✅ Store and manage data using SQLite  
+- ✅ Risk classification (Low / Medium / High)  
+- ✅ Future price prediction using Linear Regression  
+- ✅ Smart portfolio allocation based on risk + prediction  
+- ✅ Interactive dashboard using Streamlit  
+- ✅ Data visualization (trends, distribution, allocation)  
 
 ---
 
@@ -53,6 +53,7 @@ This project simulates how real-world portfolio managers make investment decisio
 ## 🚀 How to Run
 
 ### 1. Clone repository
+
 ```bash
 git clone https://github.com/seswanthmotepalli/crypto_portfolio_manager.git
 cd crypto_portfolio_manager
